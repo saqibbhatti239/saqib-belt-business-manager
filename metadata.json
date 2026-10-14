@@ -1,0 +1,6 @@
+{
+  "name": "SAQIB — Belt Business Manager",
+  "description": "Professional offline-first retail belt business management system with inventory, purchases, sales, invoices, weighted-average profit/loss, ledgers, multi-language, custom themes, wallpapers, and full Android Studio project generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
