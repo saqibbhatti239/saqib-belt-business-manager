@@ -41,7 +41,14 @@ export const DashboardView: React.FC<Props> = ({
   const stats = db.getDashboardStats();
   const recentSales = db.getSales().slice(0, 5);
 
-  // Daily Sales Target state
+  // Auto-Purchase Suggestions logic: Identify items under minimum stock levels
+  const isAutoPurchaseEnabled = settings.autoPurchaseSuggestions !== false;
+  const lowStockThreshold = settings.lowStockThreshold || 10;
+  const itemsUnderMinimumStock = React.useMemo(() => {
+    return db.getProducts().filter(
+      (p) => p.availableQuantity <= (p.minStockLevel || lowStockThreshold)
+    );
+  }, [lowStockThreshold]);
   const [isEditingTarget, setIsEditingTarget] = React.useState(false);
   const [targetInput, setTargetInput] = React.useState<number>(settings.dailySalesTarget || 50000);
   const [currentTarget, setCurrentTarget] = React.useState<number>(settings.dailySalesTarget || 50000);
@@ -119,27 +126,47 @@ export const DashboardView: React.FC<Props> = ({
                 <ShieldAlert className="w-5 h-5 text-red-400 animate-pulse" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-bold text-red-100">
-                    Low Stock Alert Notification
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="text-sm font-bold text-red-100 font-brand">
+                    {settings.autoPurchaseSuggestions !== false
+                      ? '⚡ Auto-Purchase Suggestions: Low Stock Alert'
+                      : 'Low Stock Alert Notification'}
                   </h4>
                   <span className="px-2 py-0.5 rounded-full bg-red-800 text-white font-mono text-[10px] font-bold">
                     {stats.lowStockAlertsCount} Belts Critical
                   </span>
+                  {settings.autoPurchaseSuggestions !== false && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-bold">
+                      Auto-Purchase Active
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-red-300/80 mt-0.5">
-                  The following belt models have reached or dropped below their minimum threshold. Click &quot;+ Restock Order&quot; on any item to initiate a purchase order:
+                  The following belt models are below their minimum stock level. Use 1-click generation to initiate draft purchase orders immediately:
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={() => onNavigate('purchases')}
-              className="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-600 text-white font-bold text-xs whitespace-nowrap shadow-md cursor-pointer self-start sm:self-center transition-all active:scale-95 flex items-center gap-1.5"
-            >
-              <Truck className="w-4 h-4" />
-              <span>Open Inward Purchases</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+              {stats.lowStockAlerts.length > 0 && onCreatePurchaseOrder && (
+                <button
+                  type="button"
+                  onClick={() => onCreatePurchaseOrder(stats.lowStockAlerts[0].id)}
+                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-extrabold text-xs whitespace-nowrap shadow-md cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <PlusCircle className="w-4 h-4 text-neutral-950" />
+                  <span>1-Click Draft PO ({stats.lowStockAlerts[0].code})</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onNavigate('purchases')}
+                className="px-3.5 py-2 rounded-xl bg-red-700 hover:bg-red-600 text-white font-bold text-xs whitespace-nowrap shadow-md cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <Truck className="w-4 h-4" />
+                <span>Open Purchases</span>
+              </button>
+            </div>
           </div>
 
           {/* Low Stock Product Badges with Direct Purchase Order Links */}

@@ -63,6 +63,8 @@ const defaultSettings: AppSettings = {
     soundAlerts: true,
   },
   privacyMode: false,
+  autoPurchaseSuggestions: true,
+  lowStockThreshold: 10,
 };
 
 const initialOwners: Owner[] = [
@@ -549,6 +551,12 @@ class BeltDatabase {
     }
     if (!s.notifications) {
       s.notifications = defaultSettings.notifications;
+    }
+    if (s.autoPurchaseSuggestions === undefined) {
+      s.autoPurchaseSuggestions = defaultSettings.autoPurchaseSuggestions;
+    }
+    if (s.lowStockThreshold === undefined) {
+      s.lowStockThreshold = defaultSettings.lowStockThreshold;
     }
     return s;
   }

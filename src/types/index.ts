@@ -293,4 +293,6 @@ export interface AppSettings {
   profile?: UserProfile;
   notifications?: NotificationSettings;
   privacyMode?: boolean; // Hide financial summaries until hovered/clicked
+  autoPurchaseSuggestions?: boolean; // Flag items below minimum stock and enable 1-click draft POs
+  lowStockThreshold?: number; // Minimum stock count threshold (default 10)
 }
